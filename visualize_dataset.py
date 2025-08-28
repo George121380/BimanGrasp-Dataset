@@ -57,7 +57,17 @@ if __name__ == '__main__':
         device=device
     )
     # load results
-    data_dict = np.load(os.path.join(args.result_path, args.object_name + '.npy'), allow_pickle=True)[args.num]
+    data = np.load(os.path.join(args.result_path, args.object_name + '.npy'), allow_pickle=True)
+    data_dict = data[args.num]
+    
+    # 输出pose数量信息
+    total_poses = len(data)
+    current_pose = args.num + 1  # 转换为1-based索引
+    print(f"📊 物体 '{args.object_name}' 的pose统计:")
+    print(f"   - 总pose数量: {total_poses}")
+    print(f"   - 当前显示: 第 {current_pose}/{total_poses} 个pose")
+    print(f"   - 索引范围: 0-{total_poses-1}")
+    print()
     
     # print(data_dict)
     right_qpos = data_dict['qpos_right']

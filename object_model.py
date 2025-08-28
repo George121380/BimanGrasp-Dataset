@@ -2,8 +2,8 @@ import os
 import trimesh as tm
 import plotly.graph_objects as go
 import torch
-import pytorch3d.structures
-import pytorch3d.ops
+# import pytorch3d.structures
+# import pytorch3d.ops
 import numpy as np
 
 from torchsdf import index_vertices_by_faces
@@ -53,16 +53,19 @@ class ObjectModel:
             object_faces = torch.Tensor(self.object_mesh_list[-1].faces).long().to(self.device)
             self.object_face_verts_list.append(index_vertices_by_faces(object_verts, object_faces))
             if self.num_samples != 0:
+                # Temporary workaround: use vertices as surface points instead of sampling
                 vertices = torch.tensor(self.object_mesh_list[-1].vertices, dtype=torch.float, device=self.device)
-                faces = torch.tensor(self.object_mesh_list[-1].faces, dtype=torch.float, device=self.device)
-                mesh = pytorch3d.structures.Meshes(vertices.unsqueeze(0), faces.unsqueeze(0))
-                dense_point_cloud = pytorch3d.ops.sample_points_from_meshes(mesh, num_samples=100 * self.num_samples)
-                surface_points = pytorch3d.ops.sample_farthest_points(dense_point_cloud, K=self.num_samples)[0][0]
-                surface_points.to(dtype=float, device=self.device)
+                if len(vertices) > self.num_samples:
+                    # Randomly sample vertices
+                    indices = torch.randperm(len(vertices))[:self.num_samples]
+                    surface_points = vertices[indices]
+                else:
+                    # Use all vertices and repeat if necessary
+                    surface_points = vertices.repeat((self.num_samples + len(vertices) - 1) // len(vertices), 1)[:self.num_samples]
                 self.surface_points_tensor.append(surface_points)
         if self.num_samples != 0:
             self.surface_points_tensor = torch.stack(self.surface_points_tensor, dim=0).repeat_interleave(self.batch_size_each, dim=0)  # (n_objects * batch_size_each, num_samples, 3)
-        return dense_point_cloud
+        return None
 
 
 

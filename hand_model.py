@@ -5,8 +5,8 @@ import torch
 from rot6d import robust_compute_rotation_matrix_from_ortho6d
 import pytorch_kinematics as pk
 import plotly.graph_objects as go
-import pytorch3d.structures
-import pytorch3d.ops
+# import pytorch3d.structures
+# import pytorch3d.ops
 import trimesh as tm
 from torchsdf import index_vertices_by_faces
 
@@ -131,11 +131,16 @@ class HandModel:
             if num_samples[link_name] == 0:
                 self.mesh[link_name]['surface_points'] = torch.tensor([], dtype=torch.float, device=device).reshape(0, 3)
                 continue
-            mesh = pytorch3d.structures.Meshes(self.mesh[link_name]['vertices'].unsqueeze(0), self.mesh[link_name]['faces'].unsqueeze(0))
-            dense_point_cloud = pytorch3d.ops.sample_points_from_meshes(mesh, num_samples=100 * num_samples[link_name])
-            surface_points = pytorch3d.ops.sample_farthest_points(dense_point_cloud, K=num_samples[link_name])[0][0]
-            self.mesh[link_name]['surface_points'] = surface_points.to(dtype=float, device=device)
-            self.mesh[link_name]['surface_points'] = surface_points
+            # Temporary workaround: use vertices as surface points instead of sampling
+            vertices = self.mesh[link_name]['vertices']
+            if len(vertices) > num_samples[link_name]:
+                # Randomly sample vertices
+                indices = torch.randperm(len(vertices))[:num_samples[link_name]]
+                surface_points = vertices[indices]
+            else:
+                # Use all vertices and repeat if necessary
+                surface_points = vertices.repeat((num_samples[link_name] + len(vertices) - 1) // len(vertices), 1)[:num_samples[link_name]]
+            self.mesh[link_name]['surface_points'] = surface_points.to(dtype=torch.float, device=device)
 
         # indexing
 

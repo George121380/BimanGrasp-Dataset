@@ -74,11 +74,11 @@ BimanGrasp-Dataset is a large-scale synthetic dataset of a pair of shadow robot 
     pip install trimesh plotly numpy argparse transforms3d
 
     # install pytorch3d that matches torch and python version, e.g., with pytorch==1.12.1:
-    cd third_party && wget https://github.com/facebookresearch/pytorch3d/archive/refs/tags/v0.7.1.tar.gz && tar -xzvf v0.7.1.tar.gz && cd v0.7.1.tar.gz && pip install -e. && cd ../..
+    cd third_parties && wget https://github.com/facebookresearch/pytorch3d/archive/refs/tags/v0.7.1.tar.gz && tar -xzvf v0.7.1.tar.gz && cd pytorch3d-0.7.1 && pip install -e. && cd ../..
 
     # install other third party packages
-    cd third_party/pytorch_kinematics && pip install -e .
-    cd ../third_party/torchSDF && pip install -e . && cd ../..
+    cd third_parties/pytorch_kinematics && pip install -e .
+    cd ../third_parties/torchSDF && pip install -e . && cd ../..
 
 ## Visualization
 
